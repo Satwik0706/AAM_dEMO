@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>String Matching Workbench — Naive, Rabin-Karp, Finite Automata & KMP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-[#f4f5f7] text-neutral-900 min-h-screen antialiased">
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-200/90">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-neutral-900">
+            String Matching Workbench
+          </h1>
+          <span class="px-2 py-0.5 text-[11px] font-medium rounded bg-neutral-200/70 text-neutral-700">23CS5PEAAM</span>
+        </div>
+        <p class="text-sm text-neutral-500 mt-0.5">
+          Interactive trace, execution flow, complexity derivation, and match highlighting across 4 algorithms.
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="engineStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+          Ready
+        </span>
+        <button id="btnResetAll" class="px-3 py-1.5 text-xs font-medium rounded-md bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-300 transition shadow-2xs">
+          Reset Default
+        </button>
+      </div>
+    </header>
+
+    <!-- Input & Algorithm Controls -->
+    <section class="bg-white rounded-xl border border-neutral-200/90 p-5 shadow-2xs space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <span class="text-xs font-semibold uppercase tracking-wider text-neutral-500">Input Strings &amp; Quick Presets</span>
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button data-preset="clrs" class="preset-chip px-2.5 py-1 text-xs rounded-md border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 transition">CLRS (AABA)</button>
+          <button data-preset="dna" class="preset-chip px-2.5 py-1 text-xs rounded-md border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 transition">DNA Sequence</button>
+          <button data-preset="repetitive" class="preset-chip px-2.5 py-1 text-xs rounded-md border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 transition">Worst-Case (AAAAB)</button>
+          <button data-preset="text" class="preset-chip px-2.5 py-1 text-xs rounded-md border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 transition">English Text</button>
+          <button data-preset="binary" class="preset-chip px-2.5 py-1 text-xs rounded-md border border-neutral-200 bg-neutral-50 hover:bg-neutral-100 text-neutral-700 transition">Binary</button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div class="md:col-span-7 space-y-1.5">
+          <div class="flex justify-between text-xs">
+            <label for="inputTargetText" class="font-semibold text-neutral-700">Base Text (T)</label>
+            <span id="textLengthBadge" class="font-mono text-neutral-500">n = 16</span>
+          </div>
+          <input id="inputTargetText" type="text" value="AABAACAADAABAABA"
+            class="w-full bg-neutral-50/50 border border-neutral-300 rounded-lg px-3.5 py-2 font-mono text-sm text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+        </div>
+
+        <div class="md:col-span-5 space-y-1.5">
+          <div class="flex justify-between text-xs">
+            <label for="inputPattern" class="font-semibold text-neutral-700">Search Pattern (P)</label>
+            <span id="patternLengthBadge" class="font-mono text-neutral-500">m = 4</span>
+          </div>
+          <input id="inputPattern" type="text" value="AABA"
+            class="w-full bg-neutral-50/50 border border-neutral-300 rounded-lg px-3.5 py-2 font-mono text-sm text-neutral-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition">
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-neutral-100">
+        <div class="inline-flex flex-wrap items-center gap-1 p-1 bg-neutral-100 rounded-lg border border-neutral-200/80" role="tablist">
+          <button data-algo="naive" class="algo-tab px-3 py-1.5 rounded-md text-xs font-medium transition">1. Naive</button>
+          <button data-algo="rabin_karp" class="algo-tab px-3 py-1.5 rounded-md text-xs font-medium transition">2. Rabin-Karp</button>
+          <button data-algo="finite_automata" class="algo-tab px-3 py-1.5 rounded-md text-xs font-medium transition">3. Finite Automata</button>
+          <button data-algo="kmp" class="algo-tab active px-3 py-1.5 rounded-md text-xs font-medium transition">4. KMP</button>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <label class="inline-flex items-center gap-1.5 text-xs text-neutral-600 cursor-pointer select-none">
+            <input type="checkbox" id="checkCaseSensitive" checked class="rounded border-neutral-300 text-blue-600 focus:ring-blue-500">
+            Case sensitive
+          </label>
+          <button id="btnRunSimulation" class="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold rounded-lg transition cursor-pointer shadow-2xs">
+            Run &amp; Trace All 4
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Summary Metrics Row -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="bg-white rounded-xl border border-neutral-200/90 p-4 shadow-2xs">
+        <div class="text-xs text-neutral-500 font-medium">Matches Found</div>
+        <div id="statMatchesCount" class="text-2xl font-bold font-mono text-emerald-700 mt-1">0</div>
+        <div id="statMatchIndices" class="text-xs font-mono text-neutral-500 mt-0.5 truncate">Indices: —</div>
+      </div>
+      <div class="bg-white rounded-xl border border-neutral-200/90 p-4 shadow-2xs">
+        <div id="statCompLabel" class="text-xs text-neutral-500 font-medium">Operations / Comparisons</div>
+        <div id="statComparisons" class="text-2xl font-bold font-mono text-neutral-900 mt-1">0</div>
+        <div id="statCompSub" class="text-xs text-neutral-500 mt-0.5">Actual runtime count</div>
+      </div>
+      <div class="bg-white rounded-xl border border-neutral-200/90 p-4 shadow-2xs">
+        <div class="text-xs text-neutral-500 font-medium">Execution Time</div>
+        <div id="statDuration" class="text-2xl font-bold font-mono text-neutral-900 mt-1">0 &micro;s</div>
+        <div class="text-xs text-neutral-500 mt-0.5">Measured in microseconds</div>
+      </div>
+      <div class="bg-white rounded-xl border border-neutral-200/90 p-4 shadow-2xs">
+        <div class="text-xs text-neutral-500 font-medium">Asymptotic Complexity</div>
+        <div id="statComplexity" class="text-lg font-bold font-mono text-blue-700 mt-1">O(n + m)</div>
+        <div id="statSpaceComplexity" class="text-xs font-mono text-neutral-500 mt-0.5">Space: O(m)</div>
+      </div>
+    </section>
+
+    <!-- Algorithm Execution Flow -->
+    <section class="bg-white rounded-xl border border-neutral-200/90 p-5 shadow-2xs space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-neutral-900">Algorithm Execution Flow</h2>
+        <span id="flowAlgoName" class="text-xs font-mono text-neutral-500">Knuth-Morris-Pratt (KMP)</span>
+      </div>
+      <div id="flowPipelineContainer" class="flex flex-wrap items-center gap-2 text-xs"></div>
+    </section>
+
+    <!-- Main Interactive Stepper + Full Steps Log -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+      <!-- Left: Visual Character Alignment -->
+      <div class="lg:col-span-7 bg-white rounded-xl border border-neutral-200/90 p-5 shadow-2xs space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-neutral-100">
+          <div>
+            <h2 class="text-sm font-semibold text-neutral-900">Visual Character Alignment</h2>
+            <p id="animatorCurrentAlgoLabel" class="text-xs text-neutral-500">Knuth-Morris-Pratt (KMP)</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button id="btnRestartStep" class="px-2.5 py-1.5 text-xs rounded-md border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 transition">Reset</button>
+            <button id="btnStepPrev" class="px-2.5 py-1.5 text-xs rounded-md border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 transition">&larr; Prev</button>
+            <button id="btnPlayPause" class="px-3.5 py-1.5 text-xs font-semibold rounded-md bg-blue-600 hover:bg-blue-700 text-white transition">
+              <span id="playText">Play</span>
+            </button>
+            <button id="btnStepNext" class="px-2.5 py-1.5 text-xs rounded-md border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 transition">Next &rarr;</button>
+          </div>
+        </div>
+
+        <!-- Progress, Speed & Legend -->
+        <div class="space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
+              <span id="stepCounterBadge" class="font-mono font-semibold text-neutral-700 whitespace-nowrap">Step 0 / 0</span>
+              <div class="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
+                <div id="stepProgressBar" class="bg-blue-600 h-1.5 transition-all duration-150" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-neutral-500">
+              <span>Speed:</span>
+              <input id="sliderSpeed" type="range" min="100" max="1500" step="100" value="500" class="w-20 accent-blue-600">
+              <span id="speedLabel" class="font-mono w-9">0.5s</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 text-[11px] text-neutral-500">
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-blue-100 border border-blue-600"></span> Checking</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-emerald-100 border border-emerald-600"></span> Char Match</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-red-100 border border-red-600"></span> Mismatch</span>
+            <span class="inline-flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-xs bg-green-200 border border-green-700"></span> Pattern Found</span>
+          </div>
+        </div>
+
+        <!-- Character Tracks -->
+        <div class="space-y-3 py-1 overflow-x-auto scrollbar-thin">
+          <div>
+            <div class="text-[11px] font-medium text-neutral-500 mb-1">Base Text (T)</div>
+            <div id="trackTextContainer" class="flex gap-1"></div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between text-[11px] font-medium text-neutral-500 mb-1">
+              <span>Pattern (P)</span>
+              <span id="patternShiftLabel" class="font-mono text-blue-700">Shift s = 0</span>
+            </div>
+            <div id="trackPatternContainer" class="flex gap-1"></div>
+          </div>
+        </div>
+
+        <!-- Current Step Explanation -->
+        <div class="bg-neutral-50 border border-neutral-200 rounded-lg p-3.5">
+          <div class="text-[11px] font-semibold uppercase tracking-wider text-neutral-500 mb-1">Current Step Action</div>
+          <p id="liveExplanationText" class="text-xs sm:text-sm font-mono text-neutral-800 leading-relaxed">
+            Ready to trace.
+          </p>
+        </div>
+
+        <!-- Algorithm-Specific Inspector -->
+        <div id="algoSpecificDetailsContainer">
+          <div id="panelKmpPi" class="border border-neutral-200 rounded-lg p-3.5 space-y-2 hidden">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-neutral-800">KMP Prefix Function (&pi; / LPS Table)</span>
+              <span class="font-mono text-neutral-500">Preprocessing: O(m)</span>
+            </div>
+            <div id="kmpPiTableWrapper" class="overflow-x-auto"></div>
+          </div>
+
+          <div id="panelFiniteAutomata" class="border border-neutral-200 rounded-lg p-3.5 space-y-2 hidden">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-neutral-800">DFA Transition Table &delta;(q, a)</span>
+              <span class="font-mono text-neutral-500">States: <span id="faStatesCount">0</span> | Accepting: <span id="faAcceptState">0</span></span>
+            </div>
+            <div id="faTransitionTableWrapper" class="overflow-x-auto max-h-52 scrollbar-thin"></div>
+          </div>
+
+          <div id="panelRabinKarp" class="border border-neutral-200 rounded-lg p-3.5 space-y-2 hidden">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-semibold text-neutral-800">Rabin-Karp Rolling Hash State (d = 256, q = 101)</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+              <div class="p-2 bg-neutral-50 rounded border border-neutral-200">
+                <span class="text-neutral-500 block text-[11px]">Pattern Hash (p)</span>
+                <span id="rkPatternHashVal" class="font-bold text-neutral-900">--</span>
+              </div>
+              <div class="p-2 bg-neutral-50 rounded border border-neutral-200">
+                <span class="text-neutral-500 block text-[11px]">Window Hash (t)</span>
+                <span id="rkWindowHashVal" class="font-bold text-blue-700">--</span>
+              </div>
+              <div class="p-2 bg-neutral-50 rounded border border-neutral-200">
+                <span class="text-neutral-500 block text-[11px]">Spurious Hits</span>
+                <span id="rkSpuriousHitsVal" class="font-bold text-amber-700">0</span>
+              </div>
+            </div>
+            <div class="text-[11px] font-mono text-neutral-600 bg-neutral-50 p-2 rounded border border-neutral-200">
+              t<sub>s+1</sub> = (d &middot; (t<sub>s</sub> &minus; T[s] &middot; h) + T[s+m]) mod q
+            </div>
+          </div>
+
+          <div id="panelNaive" class="border border-neutral-200 rounded-lg p-3.5 space-y-1 hidden">
+            <div class="text-xs font-semibold text-neutral-800">Naive Sliding Window State</div>
+            <p class="text-xs text-neutral-600">Checks each shift s &isin; [0, n &minus; m] sequentially without preprocessing. On mismatch, resets pattern index to 0 and advances shift by +1.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Full Step-by-Step Execution Log -->
+      <div class="lg:col-span-5 bg-white rounded-xl border border-neutral-200/90 p-5 shadow-2xs flex flex-col">
+        <div class="flex items-center justify-between gap-2 pb-3 border-b border-neutral-100">
+          <div>
+            <h2 class="text-sm font-semibold text-neutral-900">Step-by-Step Execution Log</h2>
+            <p class="text-xs text-neutral-500">Click any step to jump to that state</p>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button id="btnFilterMatches" class="px-2 py-1 text-[11px] font-medium rounded border border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 transition">
+              Matches Only
+            </button>
+            <span id="totalStepsLabel" class="text-xs font-mono text-neutral-500">0</span>
+          </div>
+        </div>
+        <div id="stepsLogList" class="mt-3 space-y-1.5 overflow-y-auto max-h-[500px] pr-1 scrollbar-thin flex-1"></div>
+      </div>
+
+    </section>
+
+    <!-- Matched Occurrences Highlighted in Base String -->
+    <section class="bg-white rounded-xl border border-neutral-200/90 p-5 shadow-2xs space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-neutral-100">
+        <div>
+          <h2 class="text-sm font-semibold text-neutral-900">Matched Pattern Occurrences in Base String</h2>
+          <p class="text-xs text-neutral-500">Complete base string showing every position where the pattern matched (click any highlighted match to inspect its step)</p>
+        </div>
+        <span id="finalMatchSummaryBadge" class="px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+          0 matches
+        </span>
+      </div>
+
+      <div id="highlightedBaseStringContainer" class="p-4 rounded-lg bg-neutral-50 border border-neutral-200 font-mono text-sm sm:text-base leading-loose tracking-wide break-all">
+        <!-- Populated dynamically with highlighted match spans -->
+      </div>
+
+      <div id="matchPositionChips" class="flex flex-wrap items-center gap-2 text-xs">
+        <!-- Populated dynamically with clickable index chips -->
+      </div>
+    </section>
+
+    <!-- Time Complexity Derivation Panel -->
+    <section class="bg-white rounded-xl border border-neutral-200/90 p-5 shadow-2xs space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-neutral-100">
+        <div>
+          <h2 class="text-sm font-semibold text-neutral-900">Time &amp; Space Complexity Derivation</h2>
+          <p class="text-xs text-neutral-500">Mathematical derivation with your exact input parameters and runtime counts</p>
+        </div>
+        <span id="derivationAlgoBadge" class="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-blue-50 text-blue-700 border border-blue-200">KMP</span>
+      </div>
+      <div id="complexityDerivationContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs"></div>
+    </section>
+
+    <!-- All 4 Algorithms Side-by-Side Comparison -->
+    <section class="bg-white rounded-xl border border-neutral-200/90 p-5 shadow-2xs space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
+        <div>
+          <h2 class="text-sm font-semibold text-neutral-900">All 4 Algorithms Benchmark Comparison</h2>
+          <p class="text-xs text-neutral-500">Click any row to switch the interactive visualizer to that algorithm</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="border-b border-neutral-200 text-neutral-500 font-semibold">
+              <th class="py-2.5 px-3">Algorithm</th>
+              <th class="py-2.5 px-3">Matches</th>
+              <th class="py-2.5 px-3">Comparisons / Ops</th>
+              <th class="py-2.5 px-3">Relative Work</th>
+              <th class="py-2.5 px-3">Time (&micro;s)</th>
+              <th class="py-2.5 px-3">Time Complexity</th>
+              <th class="py-2.5 px-3">Space</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonTableBody" class="divide-y divide-neutral-100 font-mono text-neutral-800"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="/static/js/visualizer.js"></script>
+</body>
+</html>

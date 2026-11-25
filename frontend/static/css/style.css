@@ -1,0 +1,216 @@
+/* Clean Editorial Workbench Styling */
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Algorithm Selector Tabs */
+.algo-tab {
+  color: #525252;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.algo-tab:hover {
+  color: #171717;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.algo-tab.active {
+  color: #1d4ed8;
+  background: #ffffff;
+  border-color: #e5e5e5;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Highlighted Match Inline Span */
+.match-highlight {
+  display: inline-block;
+  background: #dcfce7;
+  color: #14532d;
+  border: 1px solid #86efac;
+  border-radius: 0.25rem;
+  padding: 0 0.25rem;
+  margin: 0 1px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.12s ease, transform 0.12s ease;
+}
+
+.match-highlight:hover {
+  background: #bbf7d0;
+  border-color: #22c55e;
+}
+
+/* Character Track Cells */
+.char-cell {
+  width: 2.35rem;
+  height: 2.85rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.375rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  position: relative;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.char-cell .index-tag {
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: #737373;
+  position: absolute;
+  top: 0.15rem;
+  line-height: 1;
+}
+
+.char-cell .char-val {
+  margin-top: 0.45rem;
+}
+
+.char-default {
+  background: #ffffff;
+  border: 1px solid #d4d4d4;
+  color: #171717;
+}
+
+.char-checking {
+  background: #eff6ff;
+  border: 2px solid #2563eb;
+  color: #1e40af;
+}
+
+.char-matched {
+  background: #ecfdf5;
+  border: 2px solid #059669;
+  color: #065f46;
+}
+
+.char-mismatch {
+  background: #fef2f2;
+  border: 2px solid #dc2626;
+  color: #991b1b;
+}
+
+.char-occurrence {
+  background: #dcfce7;
+  border: 2px solid #16a34a;
+  color: #14532d;
+  font-weight: 700;
+}
+
+.char-spacer {
+  width: 2.35rem;
+  height: 2.85rem;
+  flex-shrink: 0;
+}
+
+/* Flow Pipeline Nodes */
+.flow-node {
+  padding: 0.4rem 0.7rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e5e5;
+  background: #fafafa;
+  color: #525252;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.flow-node.flow-active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.flow-node.flow-done {
+  background: #ecfdf5;
+  border-color: #10b981;
+  color: #065f46;
+}
+
+.flow-node.flow-error {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+
+/* Interactive Tables (KMP Pi & DFA Transition Matrix) */
+.interactive-table {
+  border-collapse: collapse;
+}
+
+.interactive-table th,
+.interactive-table td {
+  padding: 0.35rem 0.55rem;
+  text-align: center;
+  border: 1px solid #e5e5e5;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+}
+
+.interactive-table th {
+  background: #f5f5f5;
+  color: #525252;
+  font-weight: 600;
+}
+
+.interactive-table td {
+  background: #ffffff;
+  color: #171717;
+}
+
+.interactive-table td.active-cell {
+  background: #dbeafe;
+  color: #1e3a8a;
+  font-weight: 700;
+  border-color: #2563eb;
+}
+
+/* Step Log Item */
+.step-log-item {
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.375rem;
+  border: 1px solid #e5e5e5;
+  background: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.step-log-item:hover {
+  background: #f5f5f5;
+}
+
+.step-log-item.step-active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+}
+
+/* Subtle Scrollbars */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #a3a3a3;
+}
